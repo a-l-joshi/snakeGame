@@ -35,7 +35,7 @@ const snakeGame: React.FC = () => {
       let gameAreaWidth = gameArea.offsetWidth - 20; //gameArea.offsetWidth - Left,Right Padding;
 
       //Number divisible by 10 because snake is 10*10.
-      let gameBoardHeight = Math.round(gameAreaHeight / 10) * 10; 
+      let gameBoardHeight = Math.round(gameAreaHeight / 10) * 10;
       let gameBoardWidth = Math.round(gameAreaWidth / 10) * 10;
 
       const gameBoard = document.getElementById('game-board');
@@ -150,7 +150,7 @@ const snakeGame: React.FC = () => {
                   snakeLength.current += 1;
 
                   // Generate new food
-                  createNewFood(); 
+                  createNewFood();
                 }
               }
               //update snake new dimensions as current snake dimensions for next body part to take his place.
@@ -214,6 +214,12 @@ const snakeGame: React.FC = () => {
     food.current.left = randomLeft;
 
     setScore((prevScore) => prevScore + 1);
+
+    let highScore = Number(localStorage.getItem('highScore') || 0);
+    let currentScore = snakeLength.current - 3; //Score state latest value is not accessable in game loop.
+    if(currentScore > highScore) {
+      localStorage.setItem('highScore','' +currentScore);
+    }
   }
 
   //On click of play button hide play button and start game.
@@ -229,10 +235,17 @@ const snakeGame: React.FC = () => {
 
   // Restart game.
   let reStartGame = () => {
-    window.location.reload();
+    const restartContainer = document.getElementById('restart-container');
+    const snakeGame = document.getElementById('snake-game');
+    if (restartContainer && snakeGame) {
+      restartContainer.style.display = 'block';
+      snakeGame.style.filter = 'blur(5px)';
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    }
   }
 
-  
   //Create snakeBoard with 100ms delay because div is not rendered initially.
   useEffect(() => {
     setTimeout(() => {
@@ -253,6 +266,10 @@ const snakeGame: React.FC = () => {
             <img src='public/play.png' className='play-Button-image'></img>
             Play
           </button>
+        </div>
+        <div className="restart-container" id='restart-container'>
+          <div className='your-score'>Your score : {score}</div>
+          <div className='high-score'>High score : {localStorage.getItem('highScore') || 0 }</div>
         </div>
         <div className='snake-game' id='snake-game'>
           <div className='title'><img src="public/logo.png" className='logo' alt="logo" />SNAKE GAME</div>

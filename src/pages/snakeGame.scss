@@ -94,7 +94,7 @@
     }
 }
 
-.play-button {
+.play-container .play-button {
     z-index: 100;
     height: 100px;
     width: 100px;
@@ -103,4 +103,27 @@
     position: absolute;
     color: #eff1f1;
     font-weight: bold;
+}
+
+.restart-container {
+    display: none;
+    z-index: 100;
+    position: absolute;
+    position-area: center;
+    text-align: center;
+
+    .your-score {
+        font-size: 30px;
+        font-weight: bold;
+        color: #FFA500;
+        font-family: cursive;
+        padding: 20px;
+    }
+
+    .high-score {
+        font-size: 20px;
+        font-weight: bold;
+        color: red;
+        font-family: cursive;
+    }
 }
