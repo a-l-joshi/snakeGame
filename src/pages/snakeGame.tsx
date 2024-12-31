@@ -4,40 +4,52 @@ import { useEffect, useRef, useState } from 'react';
 import './snakeGame.scss';
 
 const snakeGame: React.FC = () => {
+  //Game board borders.
   const [gameBoardTopEnd, setGameBoardTopEnd] = useState(0);
   const [gameBoardRightEnd, setGameBoardRightEnd] = useState(0);
   const [gameBoardBottomEnd, setGameBoardBottomEnd] = useState(0);
   const [gameBoardLeftEnd, setGameBoardLeftEnd] = useState(0);
+
+  //Sanke direction manager. Tip - Used useRef beacuse upadted state not accessable in gameLoop. 
   const snakeDirection = useRef('right');
+
+  //Length of snake. Initially 3 //Head-Body-Tail.
   const snakeLength = useRef(3);
+
+  //Food for snake.
   const food = useRef({ top: 100, left: 100 });
+
+  //Game score.
   const [score, setScore] = useState(0);
 
-  let adjustSnakeBoardHeightWidth = () => {
-    const gameArea = document.getElementById('snake-game');
+  //Create snake board dynamically according to screen size.
+  let createSnakeBoard = () => {
+    const gameArea = document.getElementById('snake-game'); //Main div.
 
     if (gameArea) {
       if (gameArea.offsetHeight == 0 || gameArea.offsetWidth == 0) {
-        return;
+        return; //If not loaded.
       }
 
-      let gameAreaHeight = gameArea.offsetHeight - 150 - 100;
-      let gameAreaWidth = gameArea.offsetWidth - 20;
+      let gameAreaHeight = gameArea.offsetHeight - 150 - 100; //gameArea.offsetHeight - Buttons height - Title height;
+      let gameAreaWidth = gameArea.offsetWidth - 20; //gameArea.offsetWidth - Left,Right Padding;
 
-      let gameBoardHeight = Math.round(gameAreaHeight / 10) * 10;
+      //Number divisible by 10 because snake is 10*10.
+      let gameBoardHeight = Math.round(gameAreaHeight / 10) * 10; 
       let gameBoardWidth = Math.round(gameAreaWidth / 10) * 10;
 
-      const snakeDiv = document.getElementById('snake-div');
-      if (snakeDiv) {
-        // Apply the adjusted height and width back to the div
-        snakeDiv.style.height = `${gameBoardHeight}px`;
-        snakeDiv.style.width = `${gameBoardWidth}px`;
+      const gameBoard = document.getElementById('game-board');
+      if (gameBoard) {
+        // Apply the calculated height and width to the game board.
+        gameBoard.style.height = `${gameBoardHeight}px`;
+        gameBoard.style.width = `${gameBoardWidth}px`;
 
-        //Set border of snake
+        //Set borders of snake board
         let topBorder = 0;
-        let rightBorder = gameBoardWidth - 30;
-        let bottomBorder = gameBoardHeight - 30;
+        let rightBorder = gameBoardWidth - 30; //gameBoardWidth - Right,Left margin;
+        let bottomBorder = gameBoardHeight - 30; //gameBoardHeight - Top,Bottom margin;
         let leftBorder = 0;
+
         setGameBoardTopEnd(topBorder);
         setGameBoardRightEnd(rightBorder);
         setGameBoardBottomEnd(bottomBorder);
@@ -45,12 +57,6 @@ const snakeGame: React.FC = () => {
       }
     }
   }
-
-  useEffect(() => {
-    setTimeout(() => {
-      adjustSnakeBoardHeightWidth();
-    }, 100);
-  }, []);
 
   let startGame = () => {
     let lastTime = 0;
@@ -64,14 +70,17 @@ const snakeGame: React.FC = () => {
       if (timeElapsed > speed) {
         lastTime = timestamp;
 
-        const snake = document.getElementById("snake-0");
-        if (snake) {
-          let computedStyle = window.getComputedStyle(snake);
+        const snakeHead = document.getElementById("snake-0");
+        if (snakeHead) {
+          //Get current dimensions of snake head.
+          let computedStyle = window.getComputedStyle(snakeHead);
           let snakeTopCurr = parseFloat(computedStyle.top);
           let snakeLeftCurr = parseFloat(computedStyle.left);
 
           let snakeTopNew = snakeTopCurr;
           let snakeLeftNew = snakeLeftCurr;
+
+          //Update snake head dimensions according to direction.
           if (snakeDirection.current == 'up') {
             snakeTopNew = snakeTopCurr - 10;
             snakeLeftNew = snakeLeftCurr;
@@ -86,20 +95,22 @@ const snakeGame: React.FC = () => {
             snakeLeftNew = snakeLeftCurr - 10;
           }
 
+          //Update snake all body part location. (Head -> New location/ Body -> head/ Tail -> Body).
           for (let i = 0; i < snakeLength.current; i++) {
             const currentSnake = document.getElementById('snake-' + i);
             if (currentSnake) {
+              //Save curren dimensions of snake part to assign his previous part.
               let currentSnakeComputedStyle = window.getComputedStyle(currentSnake);
               let currentSnakeTop = parseFloat(currentSnakeComputedStyle.top);
               let currentSnakeLeft = parseFloat(currentSnakeComputedStyle.left);
 
-              if (i == 0 && currentSnakeTop < gameBoardTopEnd || currentSnakeTop > gameBoardBottomEnd || currentSnakeLeft < gameBoardLeftEnd || currentSnakeLeft > gameBoardRightEnd) {
+              if (i == 0 && snakeTopNew < gameBoardTopEnd || snakeTopNew > gameBoardBottomEnd || snakeLeftNew < gameBoardLeftEnd || snakeLeftNew > gameBoardRightEnd) {
                 reStartGame();
-                return; // Stop the game if the snake hits the border
+                return; // Stop the game if the snake hits the border.
               }
 
               //Stop the game if the snake hits his self.
-              if (i == 0) {
+              if (i == 0) { //Check for sanke head only. You know why. -__-
                 for (let i = 1; i < snakeLength.current; i++) {
                   const snakeBody = document.getElementById('snake-' + i);
                   if (snakeBody) {
@@ -116,27 +127,33 @@ const snakeGame: React.FC = () => {
                 }
               }
 
+              //Update snake location.
               currentSnake.style.top = snakeTopNew + 'px';
               currentSnake.style.left = snakeLeftNew + 'px';
 
+              //If snake eat food.
               if (i == 0 && food.current.top == snakeTopNew && food.current.left == snakeLeftNew) {
                 const currentSnakeTail = document.getElementById('snake-' + (snakeLength.current - 1));
-                const snakeDiv = document.getElementById('snake-div');
-                if (currentSnakeTail && snakeDiv) {
+                const gameBoard = document.getElementById('game-board');
+                if (currentSnakeTail && gameBoard) {
                   let currentSnakeTailComputedStyle = window.getComputedStyle(currentSnakeTail);
                   let currentSnakeTailTop = parseFloat(currentSnakeTailComputedStyle.top);
                   let currentSnakeTailLeft = parseFloat(currentSnakeTailComputedStyle.left);
 
+                  //Create new snake tail and assign dimensions of current snake tail. Inshort increase snake.
                   const newSnakeTail = document.createElement('div');
                   newSnakeTail.classList.add('snake');
                   newSnakeTail.id = 'snake-' + snakeLength.current;
                   newSnakeTail.style.top = currentSnakeTailTop + 'px';
                   newSnakeTail.style.left = currentSnakeTailLeft + 'px';
-                  snakeDiv.appendChild(newSnakeTail);
+                  gameBoard.appendChild(newSnakeTail);
                   snakeLength.current += 1;
-                  updateFoodLocation(); // Generate new food
+
+                  // Generate new food
+                  createNewFood(); 
                 }
               }
+              //update snake new dimensions as current snake dimensions for next body part to take his place.
               snakeTopNew = currentSnakeTop;
               snakeLeftNew = currentSnakeLeft;
             }
@@ -152,7 +169,8 @@ const snakeGame: React.FC = () => {
     requestAnimationFrame(gameLoop);
   };
 
-  let updateFoodLocation = () => {
+  let createNewFood = () => {
+    //Max dimensions to generate food.
     let minTop = gameBoardTopEnd;
     let maxTop = gameBoardBottomEnd;
     let minLeft = gameBoardLeftEnd;
@@ -194,9 +212,11 @@ const snakeGame: React.FC = () => {
     // If valid, update the food's position and increment the score
     food.current.top = randomTop;
     food.current.left = randomLeft;
-    setScore((prevScore) => prevScore + 1); // Increment the score
+
+    setScore((prevScore) => prevScore + 1);
   }
 
+  //On click of play button hide play button and start game.
   let playGame = () => {
     const playContainer = document.getElementById('play-container');
     const snakeGame = document.getElementById('snake-game');
@@ -207,9 +227,18 @@ const snakeGame: React.FC = () => {
     }
   }
 
+  // Restart game.
   let reStartGame = () => {
     window.location.reload();
   }
+
+  
+  //Create snakeBoard with 100ms delay because div is not rendered initially.
+  useEffect(() => {
+    setTimeout(() => {
+      createSnakeBoard();
+    }, 100);
+  }, []);
 
   return (
     <IonPage>
@@ -228,7 +257,7 @@ const snakeGame: React.FC = () => {
         <div className='snake-game' id='snake-game'>
           <div className='title'><img src="public/logo.png" className='logo' alt="logo" />SNAKE GAME</div>
           {/*Game area*/}
-          <div className='snake-div' id='snake-div'>
+          <div className='game-board' id='game-board'>
             <div className='food' id='food' style={{ position: 'absolute', top: food.current.top, left: food.current.left }}></div>
             <div className='snake' id='snake-0'></div>
             <div className='snake' id='snake-1'></div>
