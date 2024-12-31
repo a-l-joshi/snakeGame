@@ -263,7 +263,7 @@ const snakeGame: React.FC = () => {
       <IonContent>
         <div className="play-container" id='play-container'>
           <button className="play-button" onClick={playGame}>
-            <img src='public/play.png' className='play-Button-image'></img>
+            <img src='/play.png' className='play-Button-image'></img>
             Play
           </button>
         </div>
@@ -272,7 +272,7 @@ const snakeGame: React.FC = () => {
           <div className='high-score'>High score : {localStorage.getItem('highScore') || 0 }</div>
         </div>
         <div className='snake-game' id='snake-game'>
-          <div className='title'><img src="public/logo.png" className='logo' alt="logo" />SNAKE GAME</div>
+          <div className='title'><img src='/logo.png' className='logo' alt="logo" />SNAKE GAME</div>
           {/*Game area*/}
           <div className='game-board' id='game-board'>
             <div className='food' id='food' style={{ position: 'absolute', top: food.current.top, left: food.current.left }}></div>
